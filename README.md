@@ -201,7 +201,7 @@ python tests/run_all.py
 
 **Om Narayan Pandit**  
 Symbiosis Institute of Business Management, Pune  
-GitHub: [@omnarayanpandit](https://github.com/omnarayanpandit)  
+GitHub: [@Emperor2004](https://github.com/Emperor2004)  
 Portfolio: [om-narayan-pandit.vercel.app](https://om-narayan-pandit.vercel.app)
 
 *Disclaimer: Academic research project. Not investment advice.*
