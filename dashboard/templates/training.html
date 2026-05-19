@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div>
+        <h2 class="text-3xl font-extrabold text-white tracking-tight">Training Mechanics & Reward Shaping</h2>
+        <p class="text-slate-400 mt-1">Understanding the behavioral economics reward model underpinning the Reinforcement Learning agent.</p>
+    </div>
+
+    <!-- Explanation Panels -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Prospect Theory Value Function Graph (Left) -->
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-lg font-bold text-white mb-4">Prospect Theory Utility Function \(v(x)\)</h3>
+            <div class="h-[300px]">
+                <canvas id="ptUtilityChart"></canvas>
+            </div>
+            <div class="mt-4 text-xs text-slate-500 text-center">
+                Visualizing asymmetric loss aversion. Notice how losses (left side) trigger much steeper utility penalties than gains of the same magnitude (right side).
+            </div>
+        </div>
+
+        <!-- Theory & Math Card (Right) -->
+        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-white mb-4">Kahneman-Tversky Prospect Theory (1979)</h3>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    Standard Reinforcement Learning models assume rational economic actors (maximize raw expected returns). In contrast, <strong>BehaveFinRL</strong> embeds human behavioral psychology directly into the agent's reward channel.
+                </p>
+                <div class="my-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 space-y-2">
+                    <p class="text-slate-500">// Value Function Equations</p>
+                    <p>if x &ge; 0: v(x) = x<sup>&alpha;</sup> (Gains — Concave)</p>
+                    <p>if x < 0: v(x) = -&lambda; &middot; (-x)<sup>&beta;</sup> (Losses — Convex)</p>
+                    <p class="text-slate-500">// Empirical Parameters</p>
+                    <p>&alpha; = &beta; = 0.88, &lambda; = 2.25 (Baseline Loss Aversion)</p>
+                </div>
+                <h4 class="text-sm font-semibold text-slate-200 uppercase tracking-wider mb-2">Key Properties</h4>
+                <ul class="text-xs text-slate-400 space-y-2 list-disc list-inside">
+                    <li><strong>Reference Dependence</strong>: Outcomes are judged relative to entry capital (P&L return %) rather than absolute wealth levels.</li>
+                    <li><strong>Loss Aversion</strong>: The utility curve is steeper for losses than gains. The agent experiences a $1,000 loss 2.25 times more intensely than a $1,000 gain.</li>
+                    <li><strong>Diminishing Sensitivity</strong>: Exponential exponents (0.88) lead to a concave gain curve and convex loss curve, mimicking actual investor preference limits.</li>
+                </ul>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-800/60 text-xs text-slate-500">
+                Reward shaping forces the PPO policy to act as a highly risk-aware portfolio manager.
+            </div>
+        </div>
+    </div>
+
+    <!-- PPO Setup & Multi-Seed Summary -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-lg font-bold text-white mb-4">Reinforcement Learning Configuration (PPO)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-850">
+                <span class="text-xs text-slate-500 block uppercase tracking-wider font-semibold">Algorithm</span>
+                <span class="text-lg font-bold text-white block mt-1">PPO (MLP Policy)</span>
+            </div>
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-850">
+                <span class="text-xs text-slate-500 block uppercase tracking-wider font-semibold">Total Timesteps</span>
+                <span class="text-lg font-bold text-white block mt-1">200,000 / Seed</span>
+            </div>
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-850">
+                <span class="text-xs text-slate-500 block uppercase tracking-wider font-semibold">Learning Rate</span>
+                <span class="text-lg font-bold text-white block mt-1">3e-4 (Adam)</span>
+            </div>
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-850">
+                <span class="text-xs text-slate-500 block uppercase tracking-wider font-semibold">Gamma (Discount)</span>
+                <span class="text-lg font-bold text-white block mt-1">0.99</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to plot Prospect Theory curve -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('ptUtilityChart').getContext('2d');
+        
+        // Generate Prospect Theory points
+        const points = [];
+        const labels = [];
+        const alpha = 0.88;
+        const beta = 0.88;
+        const lambda = 2.25;
+
+        for (let x = -0.10; x <= 0.10; x += 0.005) {
+            labels.push((x * 100).toFixed(1) + '%');
+            let v = 0;
+            if (x >= 0) {
+                v = Math.pow(x, alpha);
+            } else {
+                v = -lambda * Math.pow(-x, beta);
+            }
+            points.push(v);
+        }
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Prospect Theory Utility v(x)',
+                    data: points,
+                    borderColor: '#6366f1',
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    tension: 0.1,
+                    segment: {
+                        borderColor: ctx => ctx.p0.parsed.x < 20 ? '#f43f5e' : '#10b981'
+                    },
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.02)', zeroLineColor: 'rgba(255, 255, 255, 0.2)' },
+                        ticks: { color: '#64748b', font: { family: 'Outfit', size: 9 }, maxTicksLimit: 11 }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.02)', zeroLineColor: 'rgba(255, 255, 255, 0.2)' },
+                        ticks: { color: '#64748b', font: { family: 'Outfit', size: 9 } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

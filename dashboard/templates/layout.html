@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BehaveFinRL - Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax for LaTeX Equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.9));
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900/80 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col z-20">
+        <!-- Logo -->
+        <div class="p-6 border-b border-slate-800 flex items-center space-x-3">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white">BehaveFinRL</h1>
+                <span class="text-xs text-slate-500 font-medium">Prospect Theory RL Agent</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <a href="/" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'overview' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-gauge-high group-hover:text-blue-400 {% if active_page == 'overview' %}text-white{% endif %}"></i>
+                <span>Overview</span>
+            </a>
+            <a href="/training" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'training' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-network-wired group-hover:text-blue-400 {% if active_page == 'training' %}text-white{% endif %}"></i>
+                <span>Training Performance</span>
+            </a>
+            <a href="/regime" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'regime' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-cloud-sun group-hover:text-blue-400 {% if active_page == 'regime' %}text-white{% endif %}"></i>
+                <span>Market Regimes</span>
+            </a>
+            <a href="/shap" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'shap' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-brain group-hover:text-blue-400 {% if active_page == 'shap' %}text-white{% endif %}"></i>
+                <span>SHAP Explainability</span>
+            </a>
+        </nav>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-slate-800 bg-slate-950/40 text-center">
+            <span class="text-xs text-slate-500 block">Developed by</span>
+            <span class="text-xs font-semibold text-slate-300">Om Narayan Pandit</span>
+            <span class="text-[10px] text-slate-600 block mt-1">SIBM Pune</span>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-950/10">
+        <!-- Header -->
+        <header class="h-16 border-b border-slate-800/80 flex items-center justify-between px-8 bg-slate-900/20 backdrop-blur-md z-10">
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-800/60 px-2.5 py-1 rounded-md border border-slate-700/50">Status: Running</span>
+                <span class="text-xs text-slate-400 font-medium">Asset: SP500 Index</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Date Range</span>
+                    <span class="text-xs font-medium text-slate-300">2018-01-01 to 2024-01-01</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+</body>
+</html>

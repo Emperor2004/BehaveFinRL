@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div>
+        <h2 class="text-3xl font-extrabold text-white tracking-tight">Policy Explainability (SHAP)</h2>
+        <p class="text-slate-400 mt-1">Interpreting the neural policy's decision-making across distinct market environments using KernelSHAP.</p>
+    </div>
+
+    <!-- Explanation Panel -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-lg font-bold text-white mb-3">SHAP (SHapley Additive exPlanations)</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+            Standard deep reinforcement learning agents are "black boxes"—their decision-making process is invisible. We employ **KernelSHAP** to attribute the model's target portfolio weight allocations (long/short/neutral) to its input features (technical indicators, macroeconomics, and market microstructure variables).
+        </p>
+    </div>
+
+    <!-- SHAP Regimes Tabs -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <!-- Tabs Header -->
+        <div class="flex border-b border-slate-800 bg-slate-900/50">
+            <button onclick="switchShapTab('bull')" id="tab-bull" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 focus:outline-none transition duration-200">
+                <i class="fa-solid fa-chart-line mr-2"></i>Bull Regime Features
+            </button>
+            <button onclick="switchShapTab('bear')" id="tab-bear" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none transition duration-200">
+                <i class="fa-solid fa-cloud-showers-water mr-2"></i>Bear Regime Features
+            </button>
+            <button onclick="switchShapTab('volatile')" id="tab-volatile" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none transition duration-200">
+                <i class="fa-solid fa-triangle-exclamation mr-2"></i>Volatile Regime Features
+            </button>
+        </div>
+
+        <!-- Tabs Content Container -->
+        <div class="p-8">
+            <!-- Bull Tab -->
+            <div id="content-bull" class="grid grid-cols-1 lg:grid-cols-2 gap-8 shap-content">
+                <div>
+                    <h4 class="text-lg font-bold text-emerald-400 mb-3">Bull Market Policy Attributes</h4>
+                    <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                        In a Bull regime, the agent's objective is to capture upside trends by allocating high long weights. Features tracking moving average ratios, RSI momentum, and interest rates drive allocation decisions. Since the baseline loss aversion \(\lambda\) is relaxed (2.00), the agent responds strongly to positive price trends and targets fully invested weights.
+                    </p>
+                    {% if shap_data and shap_data.Bull %}
+                    <h5 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Feature Importances</h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-400">
+                            <thead class="text-slate-500 border-b border-slate-800">
+                                <tr>
+                                    <th class="pb-2 font-medium">Rank</th>
+                                    <th class="pb-2 font-medium">Feature Name</th>
+                                    <th class="pb-2 font-medium text-right">SHAP Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in shap_data.Bull[:5] %}
+                                <tr>
+                                    <td class="py-2">#{{ loop.index }}</td>
+                                    <td class="py-2 font-semibold text-slate-300">{{ item.feature }}</td>
+                                    <td class="py-2 text-right text-emerald-400 font-mono">{{ "%.5f"|format(item.mean_abs_shap) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center justify-center bg-slate-900/30 rounded-xl border border-slate-850 p-4 min-h-[300px]">
+                    {% if has_plots.bull %}
+                    <img src="/static/images/shap_importance_bull.png" alt="SHAP Bull Plot" class="max-h-[350px] rounded-lg shadow-lg">
+                    {% else %}
+                    <div class="text-center text-slate-500">
+                        <i class="fa-solid fa-image text-3xl mb-2"></i>
+                        <p class="text-xs">Run SHAP analysis script to generate plot.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Bear Tab -->
+            <div id="content-bear" class="grid grid-cols-1 lg:grid-cols-2 gap-8 shap-content hidden">
+                <div>
+                    <h4 class="text-lg font-bold text-rose-400 mb-3">Bear Market Policy Attributes</h4>
+                    <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                        In a Bear regime, the agent becomes highly loss-averse (\(\lambda = 2.75\)). The policy is driven almost entirely by volatility indices (VIX), technical drawdown indicators, and macroeconomic risk metrics. The agent exhibits a heavy bias toward cash, liquidating positions rapidly at the first sign of price weakness to avoid steep psychological penalties.
+                    </p>
+                    {% if shap_data and shap_data.Bear %}
+                    <h5 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Feature Importances</h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-400">
+                            <thead class="text-slate-500 border-b border-slate-800">
+                                <tr>
+                                    <th class="pb-2 font-medium">Rank</th>
+                                    <th class="pb-2 font-medium">Feature Name</th>
+                                    <th class="pb-2 font-medium text-right">SHAP Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in shap_data.Bear[:5] %}
+                                <tr>
+                                    <td class="py-2">#{{ loop.index }}</td>
+                                    <td class="py-2 font-semibold text-slate-300">{{ item.feature }}</td>
+                                    <td class="py-2 text-right text-rose-400 font-mono">{{ "%.5f"|format(item.mean_abs_shap) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center justify-center bg-slate-900/30 rounded-xl border border-slate-850 p-4 min-h-[300px]">
+                    {% if has_plots.bear %}
+                    <img src="/static/images/shap_importance_bear.png" alt="SHAP Bear Plot" class="max-h-[350px] rounded-lg shadow-lg">
+                    {% else %}
+                    <div class="text-center text-slate-500">
+                        <i class="fa-solid fa-image text-3xl mb-2"></i>
+                        <p class="text-xs">Run SHAP analysis script to generate plot.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Volatile Tab -->
+            <div id="content-volatile" class="grid grid-cols-1 lg:grid-cols-2 gap-8 shap-content hidden">
+                <div>
+                    <h4 class="text-lg font-bold text-amber-400 mb-3">Volatile Market Policy Attributes</h4>
+                    <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                        In the intermediate Volatile/Transition state (\(\lambda = 2.40\)), the agent must balance trend-following with risk management. It reacts to yield curve spreads (T10Y2Y) and short-term volatility. The decision boundaries are highly complex, with the agent frequently transitioning to cash to avoid whipsaws.
+                    </p>
+                    {% if shap_data and shap_data.Volatile %}
+                    <h5 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Feature Importances</h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-400">
+                            <thead class="text-slate-500 border-b border-slate-800">
+                                <tr>
+                                    <th class="pb-2 font-medium">Rank</th>
+                                    <th class="pb-2 font-medium">Feature Name</th>
+                                    <th class="pb-2 font-medium text-right">SHAP Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in shap_data.Volatile[:5] %}
+                                <tr>
+                                    <td class="py-2">#{{ loop.index }}</td>
+                                    <td class="py-2 font-semibold text-slate-300">{{ item.feature }}</td>
+                                    <td class="py-2 text-right text-amber-400 font-mono">{{ "%.5f"|format(item.mean_abs_shap) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center justify-center bg-slate-900/30 rounded-xl border border-slate-850 p-4 min-h-[300px]">
+                    {% if has_plots.volatile %}
+                    <img src="/static/images/shap_importance_volatile.png" alt="SHAP Volatile Plot" class="max-h-[350px] rounded-lg shadow-lg">
+                    {% else %}
+                    <div class="text-center text-slate-500">
+                        <i class="fa-solid fa-image text-3xl mb-2"></i>
+                        <p class="text-xs">Run SHAP analysis script to generate plot.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchShapTab(regime) {
+        // Hide all tab contents
+        document.querySelectorAll('.shap-content').forEach(element => {
+            element.classList.add('hidden');
+        });
+        
+        // Show current tab content
+        document.getElementById(`content-${regime}`).classList.remove('hidden');
+        
+        // Reset tab styles
+        const tabs = ['bull', 'bear', 'volatile'];
+        const colors = {
+            'bull': 'border-emerald-500 text-emerald-400',
+            'bear': 'border-rose-500 text-rose-400',
+            'volatile': 'border-amber-500 text-amber-400'
+        };
+        
+        tabs.forEach(t => {
+            const tabButton = document.getElementById(`tab-${t}`);
+            tabButton.className = "flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none transition duration-200";
+        });
+        
+        // Set active tab style
+        const activeTab = document.getElementById(`tab-${regime}`);
+        activeTab.className = `flex-1 py-4 text-center text-sm font-semibold border-b-2 ${colors[regime]} focus:outline-none transition duration-200`;
+    }
+</script>
+{% endblock %}
