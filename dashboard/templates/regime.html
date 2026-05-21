@@ -1,63 +1,94 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="space-y-8 relative">
     <!-- Header -->
-    <div>
-        <h2 class="text-3xl font-extrabold text-white tracking-tight">Market Regime Analysis (HMM)</h2>
-        <p class="text-slate-400 mt-1">Hidden Markov Model classification of the S&P 500 test period into Bull, Bear, and Volatile states.</p>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Market Regime Analysis (HMM)</h2>
+            <p class="text-slate-400 text-xs mt-1">Hidden Markov Model classification of the test asset into distinct trading environments.</p>
+        </div>
+        <div class="flex items-center space-x-2 bg-[#121425] border border-[#1B1E32] px-3 py-1.5 rounded-xl text-xs text-slate-400">
+            <span class="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></span>
+            <span>HMM: 3-State Detector</span>
+        </div>
     </div>
 
     <!-- Parameter Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Bull Regime Card -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500">
-            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Bull Regime (State 0)</span>
-            <div class="mt-2 flex items-baseline space-x-2">
-                <span class="text-3xl font-bold text-white">\(\lambda = {{ stats.bull_lambda }}\)</span>
-                <span class="text-xs text-slate-400 font-medium">Slightly Relaxed</span>
+        <div class="glass-card p-6 rounded-2xl border-t-2 border-emerald-500 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">State 0</span>
+                <span class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
             </div>
-            <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-                Characterized by steady positive asset returns and low volatility. The agent's loss aversion is relaxed to permit active position-taking and trend riding.
+            <h3 class="text-sm font-bold text-white mt-1">Bull Regime</h3>
+            <div class="mt-4 flex items-baseline space-x-1.5">
+                <span class="text-2xl font-bold text-white">\(\lambda = {{ stats.bull_lambda }}\)</span>
+                <span class="text-[10px] text-slate-400">Relaxed Posture</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                Characterized by upward price trends and low volatility. The agent's loss aversion is relaxed to permit active risk-taking and momentum exposure.
             </p>
         </div>
 
         <!-- Bear Regime Card -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-rose-500">
-            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Bear Regime (State 1)</span>
-            <div class="mt-2 flex items-baseline space-x-2">
-                <span class="text-3xl font-bold text-white">\(\lambda = {{ stats.bear_lambda }}\)</span>
-                <span class="text-xs text-slate-400 font-medium">Scaled Upward (+22%)</span>
+        <div class="glass-card p-6 rounded-2xl border-t-2 border-rose-500 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">State 1</span>
+                <span class="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_#ef4444]"></span>
             </div>
-            <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-                Characterized by negative returns and spikes in fear index (VIX). Loss aversion scaling forces the agent to lock in cash and protect investment equity.
+            <h3 class="text-sm font-bold text-white mt-1">Bear Regime</h3>
+            <div class="mt-4 flex items-baseline space-x-1.5">
+                <span class="text-2xl font-bold text-white">\(\lambda = {{ stats.bear_lambda }}\)</span>
+                <span class="text-[10px] text-slate-400">Scaled Aversion (+22%)</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                Negative returns and spikes in the CBOE Volatility Index (VIX). High loss aversion forces rapid liquidations to safeguard equity capital.
             </p>
         </div>
 
         <!-- Volatile Regime Card -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-500">
-            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Volatile Regime (State 2)</span>
-            <div class="mt-2 flex items-baseline space-x-2">
-                <span class="text-3xl font-bold text-white">\(\lambda = {{ stats.volatile_lambda }}\)</span>
-                <span class="text-xs text-slate-400 font-medium">Moderate Increase</span>
+        <div class="glass-card p-6 rounded-2xl border-t-2 border-amber-500 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">State 2</span>
+                <span class="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]"></span>
             </div>
-            <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-                Characterized by high return dispersion and intermediate VIX levels. The agent dynamically scales down position sizes to mitigate downside whipsaws.
+            <h3 class="text-sm font-bold text-white mt-1">Volatile Regime</h3>
+            <div class="mt-4 flex items-baseline space-x-1.5">
+                <span class="text-2xl font-bold text-white">\(\lambda = {{ stats.volatile_lambda }}\)</span>
+                <span class="text-[10px] text-slate-400">Moderate Guard</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                Erratic swing patterns and intermediate fear levels. The policy scales down weight positions to mitigate whipsaws and preserve cash.
             </p>
         </div>
     </div>
 
     <!-- HMM Price Overlay Chart -->
-    <div class="glass-card p-6 rounded-2xl">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-bold text-white">HMM Market Regimes Overlay (Timeline)</h3>
-            <div class="flex space-x-4 text-xs font-semibold">
-                <span class="flex items-center space-x-1.5"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500/30 border border-emerald-500"></span><span class="text-slate-300">Bull</span></span>
-                <span class="flex items-center space-x-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-500/30 border border-rose-500"></span><span class="text-slate-300">Bear</span></span>
-                <span class="flex items-center space-x-1.5"><span class="h-2.5 w-2.5 rounded-full bg-amber-500/30 border border-amber-500"></span><span class="text-slate-300">Volatile</span></span>
+    <div class="glass-card p-6 rounded-2xl border border-[#1B1E32]">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0 mb-6">
+            <div>
+                <h3 class="text-base font-bold text-white">Regime Transition Timeline</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Asset price path shaded by HMM classification</p>
+            </div>
+            <!-- Legend Indicators from reference -->
+            <div class="flex space-x-4 text-[10px] font-bold uppercase tracking-wider">
+                <span class="flex items-center space-x-1.5">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500/20 border border-emerald-500"></span>
+                    <span class="text-slate-300">Bull</span>
+                </span>
+                <span class="flex items-center space-x-1.5">
+                    <span class="h-2 w-2 rounded-full bg-rose-500/20 border border-rose-500"></span>
+                    <span class="text-slate-300">Bear</span>
+                </span>
+                <span class="flex items-center space-x-1.5">
+                    <span class="h-2 w-2 rounded-full bg-amber-500/20 border border-amber-500"></span>
+                    <span class="text-slate-300">Volatile</span>
+                </span>
             </div>
         </div>
-        <div class="h-[450px]">
+        <div class="h-[400px]">
             <canvas id="regimeChart"></canvas>
         </div>
     </div>
@@ -79,9 +110,9 @@
                 // Colors corresponding to logical regime states
                 // 0: Bull (greenish), 1: Bear (reddish), 2: Volatile (yellowish)
                 const regimeColors = {
-                    0: 'rgba(16, 185, 129, 0.12)', // Emerald tint
-                    1: 'rgba(244, 63, 94, 0.12)',   // Rose tint
-                    2: 'rgba(245, 158, 11, 0.12)'   // Amber tint
+                    0: 'rgba(16, 185, 129, 0.08)', // Emerald tint
+                    1: 'rgba(244, 63, 94, 0.08)',   // Rose tint
+                    2: 'rgba(245, 158, 11, 0.08)'   // Amber tint
                 };
                 
                 // Color array for the points
@@ -102,7 +133,8 @@
                             borderWidth: 1.5,
                             pointBackgroundColor: pointColors,
                             pointBorderColor: pointColors,
-                            pointRadius: 1.5,
+                            pointRadius: 1,
+                            pointHoverRadius: 4,
                             tension: 0.1,
                             fill: false
                         }]
@@ -115,16 +147,36 @@
                             mode: 'index'
                         },
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#121425',
+                                borderColor: '#1B1E32',
+                                borderWidth: 1,
+                                titleColor: '#ffffff',
+                                bodyColor: '#cbd5e1',
+                                titleFont: { family: 'Outfit', size: 10, weight: 'bold' },
+                                bodyFont: { family: 'Outfit', size: 9 },
+                                cornerRadius: 8,
+                                padding: 8,
+                                callbacks: {
+                                    afterLabel: function(context) {
+                                        const idx = context.dataIndex;
+                                        const stateNames = { 0: 'Bull (State 0)', 1: 'Bear (State 1)', 2: 'Volatile (State 2)' };
+                                        const r = data.regimes[idx];
+                                        const l = data.lambdas[idx];
+                                        return 'Regime: ' + stateNames[r] + '\nLoss Aversion (λ): ' + l.toFixed(2);
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                                ticks: { color: '#64748b', font: { family: 'Outfit', size: 10 }, maxTicksLimit: 12 }
+                                grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                                ticks: { color: '#64748b', font: { family: 'Outfit', size: 9 }, maxTicksLimit: 11 }
                             },
                             y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                                ticks: { color: '#64748b', font: { family: 'Outfit', size: 10 } }
+                                grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                                ticks: { color: '#64748b', font: { family: 'Outfit', size: 9 } }
                             }
                         }
                     },

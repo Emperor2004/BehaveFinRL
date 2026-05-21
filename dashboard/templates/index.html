@@ -1,68 +1,136 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Header Summary -->
-    <div>
-        <h2 class="text-3xl font-extrabold text-white tracking-tight">System Overview</h2>
-        <p class="text-slate-400 mt-1">Key metrics and portfolio equity curves for the trained BehaveFinRL agent across multiple seeds.</p>
+<div class="space-y-8 relative">
+
+    <!-- Title and Subtitle -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">System Overview</h2>
+            <p class="text-slate-400 text-xs mt-1">Multi-seed reinforcement learning evaluation logs against the S&P 500 benchmark.</p>
+        </div>
+        <!-- Time Range Badge -->
+        <div class="flex items-center space-x-2 bg-[#121425] border border-[#1B1E32] px-3 py-1.5 rounded-xl text-xs text-slate-400">
+            <i class="fa-regular fa-calendar-days text-purple-400"></i>
+            <span>Test Horizon: 2018 - 2024</span>
+        </div>
     </div>
 
-    <!-- KPI Metrics Grid -->
+    <!-- KPI Metrics Grid (With glowing inline SVG Sparklines from reference) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Metric Card 1: Return -->
-        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Average Return</span>
-                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <i class="fa-solid fa-arrow-trend-up"></i>
+        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300 relative overflow-hidden flex flex-col justify-between h-44">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Average Return</span>
+                    <span class="text-2xl font-bold text-white mt-2 block">{{ metrics.avg_return }}</span>
+                </div>
+                <div class="flex flex-col items-end space-y-1">
+                    <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                        <i class="fa-solid fa-caret-up mr-0.5"></i> Outperform
+                    </span>
+                    <span class="text-[9px] text-slate-500">vs. {{ metrics.bench_return }} B&H</span>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-3xl font-bold text-white block">{{ metrics.avg_return }}</span>
-                <span class="text-xs text-slate-500 block mt-1">vs. <span class="font-medium text-slate-400">{{ metrics.bench_return }}</span> (Buy & Hold)</span>
+            <!-- Sparkline visual matching Image 1 -->
+            <div class="mt-4 opacity-80">
+                <svg class="w-full h-12" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-return" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,25 Q15,12 35,22 T65,8 T90,14 T100,5" fill="none" stroke="#10b981" stroke-width="1.8" />
+                    <path d="M0,25 Q15,12 35,22 T65,8 T90,14 T100,5 L100,30 L0,30 Z" fill="url(#grad-return)" />
+                </svg>
             </div>
         </div>
 
         <!-- Metric Card 2: Sharpe -->
-        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Sharpe Ratio</span>
-                <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
-                    <i class="fa-solid fa-scale-balanced"></i>
+        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300 relative overflow-hidden flex flex-col justify-between h-44">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Sharpe Ratio</span>
+                    <span class="text-2xl font-bold text-white mt-2 block">{{ metrics.avg_sharpe }}</span>
+                </div>
+                <div class="flex flex-col items-end space-y-1">
+                    <span class="text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                        SR vs B&H
+                    </span>
+                    <span class="text-[9px] text-slate-500">vs. {{ metrics.bench_sharpe }} B&H</span>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-3xl font-bold text-white block">{{ metrics.avg_sharpe }}</span>
-                <span class="text-xs text-slate-500 block mt-1">vs. <span class="font-medium text-slate-400">{{ metrics.bench_sharpe }}</span> (Buy & Hold)</span>
+            <!-- Sparkline visual matching Image 1 -->
+            <div class="mt-4 opacity-80">
+                <svg class="w-full h-12" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-sharpe" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#00F2FE" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#00F2FE" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,20 Q20,6 45,18 T75,10 T100,4" fill="none" stroke="#00F2FE" stroke-width="1.8" />
+                    <path d="M0,20 Q20,6 45,18 T75,10 T100,4 L100,30 L0,30 Z" fill="url(#grad-sharpe)" />
+                </svg>
             </div>
         </div>
 
         <!-- Metric Card 3: Max Drawdown -->
-        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Max Drawdown</span>
-                <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
-                    <i class="fa-solid fa-arrow-down-long"></i>
+        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300 relative overflow-hidden flex flex-col justify-between h-44">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Max Drawdown</span>
+                    <span class="text-2xl font-bold text-white mt-2 block">{{ metrics.avg_mdd }}</span>
+                </div>
+                <div class="flex flex-col items-end space-y-1">
+                    <span class="text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
+                        Low Drawdown
+                    </span>
+                    <span class="text-[9px] text-slate-500">vs. {{ metrics.bench_mdd }} B&H</span>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-3xl font-bold text-white block">{{ metrics.avg_mdd }}</span>
-                <span class="text-xs text-slate-500 block mt-1">vs. <span class="font-medium text-slate-400">{{ metrics.bench_mdd }}</span> (Buy & Hold)</span>
+            <!-- Sparkline visual matching Image 1 -->
+            <div class="mt-4 opacity-80">
+                <svg class="w-full h-12" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-mdd" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FF007F" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#FF007F" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,8 Q25,28 45,12 T75,24 T100,16" fill="none" stroke="#FF007F" stroke-width="1.8" />
+                    <path d="M0,8 Q25,28 45,12 T75,24 T100,16 L100,30 L0,30 Z" fill="url(#grad-mdd)" />
+                </svg>
             </div>
         </div>
 
         <!-- Metric Card 4: Win Rate -->
-        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Outperformance</span>
-                <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                    <i class="fa-solid fa-trophy"></i>
+        <div class="glass-card p-6 rounded-2xl glow-hover transition duration-300 relative overflow-hidden flex flex-col justify-between h-44">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Outperformance</span>
+                    <span class="text-2xl font-bold text-white mt-2 block">{{ metrics.outperformance }}</span>
+                </div>
+                <div class="flex flex-col items-end space-y-1">
+                    <span class="text-[10px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md">
+                        Alpha Output
+                    </span>
+                    <span class="text-[9px] text-slate-500">Active Risk Scaling</span>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-3xl font-bold text-white block">{{ metrics.outperformance }}</span>
-                <span class="text-xs text-slate-500 block mt-1">Alpha generated over benchmark</span>
+            <!-- Sparkline visual matching Image 1 -->
+            <div class="mt-4 opacity-80">
+                <svg class="w-full h-12" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-outperf" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#8A2BE2" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#8A2BE2" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,25 Q15,20 35,10 T65,16 T90,4 T100,1" fill="none" stroke="#8A2BE2" stroke-width="1.8" />
+                    <path d="M0,25 Q15,20 35,10 T65,16 T90,4 T100,1 L100,30 L0,30 Z" fill="url(#grad-outperf)" />
+                </svg>
             </div>
         </div>
     </div>
@@ -70,39 +138,54 @@
     <!-- Charts and Table Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Equity Curve Chart (Left, 2 columns wide) -->
-        <div class="glass-card p-6 rounded-2xl lg:col-span-2">
+        <div class="glass-card p-6 rounded-2xl lg:col-span-2 border border-[#1B1E32]">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white">Portfolio Equity Curves</h3>
-                <span class="text-xs text-slate-400">Initial Capital: $10,000</span>
+                <div>
+                    <h3 class="text-base font-bold text-white">Portfolio Equity Curves</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Asset net worth starting with $10,000</p>
+                </div>
+                <div class="flex items-center space-x-2 bg-[#0B0D19] border border-[#1B1E32] px-3 py-1 rounded-lg text-[10px] text-slate-400">
+                    <span class="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                    <span>Continuous Action Space</span>
+                </div>
             </div>
-            <div class="h-[400px]">
+            <div class="h-[350px]">
                 <canvas id="equityChart"></canvas>
             </div>
         </div>
 
         <!-- Seeds Table (Right, 1 column wide) -->
-        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between border border-[#1B1E32]">
             <div>
-                <h3 class="text-lg font-bold text-white mb-6">Statistical Robustness (Seeds)</h3>
+                <div class="mb-6">
+                    <h3 class="text-base font-bold text-white">Statistical Robustness</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Performance tracking across random seeds</p>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase border-b border-slate-800">
+                    <table class="w-full text-left text-xs text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase border-b border-[#1B1E32] tracking-wider">
                             <tr>
-                                <th class="py-3 font-semibold">Seed</th>
-                                <th class="py-3 font-semibold">Return</th>
-                                <th class="py-3 font-semibold">Sharpe</th>
-                                <th class="py-3 font-semibold">Max DD</th>
-                                <th class="py-3 font-semibold">Win Rate</th>
+                                <th class="pb-3 font-bold">Seed ID</th>
+                                <th class="pb-3 font-bold">Return</th>
+                                <th class="pb-3 font-bold">Sharpe</th>
+                                <th class="pb-3 font-bold">Max DD</th>
+                                <th class="pb-3 font-bold">Win Rate</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-850">
+                        <tbody class="divide-y divide-[#1B1E32]/50">
                             {% for s in seeds %}
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="py-3.5 font-medium text-slate-200">#{{ s.seed }}</td>
-                                <td class="py-3.5 {% if '-' in s.return %}text-rose-400{% else %}text-emerald-400{% endif %} font-semibold">{{ s.return }}</td>
-                                <td class="py-3.5 text-slate-300">{{ s.sharpe }}</td>
-                                <td class="py-3.5 text-slate-400">{{ s.mdd }}</td>
-                                <td class="py-3.5 text-slate-400">{{ s.win_rate }}</td>
+                            <tr class="hover:bg-white/[0.02] transition">
+                                <td class="py-3.5 font-medium text-slate-200">
+                                    <span class="bg-[#1B1E32] text-slate-300 font-semibold px-2 py-0.5 rounded-md border border-[#25283C]">
+                                        #{{ s.seed }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 {% if '-' in s.return %}text-rose-400{% else %}text-emerald-400{% endif %} font-bold">
+                                    {{ s.return }}
+                                </td>
+                                <td class="py-3.5 text-slate-300 font-mono">{{ s.sharpe }}</td>
+                                <td class="py-3.5 text-slate-400 font-mono">{{ s.mdd }}</td>
+                                <td class="py-3.5 text-slate-400 font-mono">{{ s.win_rate }}</td>
                             </tr>
                             {% else %}
                             <tr>
@@ -113,9 +196,9 @@
                     </table>
                 </div>
             </div>
-            <div class="mt-6 pt-4 border-t border-slate-800/60 text-xs text-slate-500 flex items-center space-x-2">
-                <i class="fa-solid fa-circle-info text-blue-400/80 text-sm"></i>
-                <span>Prospect Theory shaped RL avoids catastrophic drawdowns during volatile transitions.</span>
+            <div class="mt-6 pt-4 border-t border-[#1B1E32]/60 text-[10px] text-slate-500 flex items-start space-x-2.5">
+                <i class="fa-solid fa-shield-halved text-purple-400/80 text-sm mt-0.5"></i>
+                <span class="leading-relaxed">CMDP risk restrictions (drawdown and Value-at-Risk) constrain action weights to prevent severe equity erosion.</span>
             </div>
         </div>
     </div>
@@ -137,31 +220,42 @@
                 // Format datasets
                 const datasets = [];
                 
-                // Add benchmark dataset (bold dashed line)
+                // Add benchmark dataset (dashed gray curve)
                 datasets.push({
                     label: 'Benchmark (Buy & Hold)',
                     data: data.benchmark,
-                    borderColor: '#94a3b8',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
+                    borderColor: '#475569',
+                    borderWidth: 1.5,
+                    borderDash: [4, 4],
                     pointRadius: 0,
                     fill: false
                 });
 
-                // Colors for seeds
-                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+                // Neon Colors matching reference Image 1 & 2
+                const colors = ['#8A2BE2', '#00F2FE', '#FF007F', '#10B981', '#F59E0B'];
                 let colorIdx = 0;
 
                 // Add each seed
                 for (const [seed, history] of Object.entries(data.seeds)) {
+                    const c = colors[colorIdx % colors.length];
+                    
+                    // Create gradient fill under curve
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+                    gradient.addColorStop(0, c + '25'); // 14% opacity
+                    gradient.addColorStop(1, c + '00'); // 0% opacity
+
                     datasets.push({
                         label: `RL Agent (Seed ${seed})`,
                         data: history,
-                        borderColor: colors[colorIdx % colors.length],
-                        borderWidth: 1.8,
+                        borderColor: c,
+                        borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.1,
-                        fill: false
+                        tension: 0.2,
+                        fill: true,
+                        backgroundColor: gradient,
+                        // Soft glow effect on the lines
+                        borderJoinStyle: 'round',
+                        borderCapStyle: 'round'
                     });
                     colorIdx++;
                 }
@@ -181,26 +275,58 @@
                         },
                         plugins: {
                             legend: {
+                                position: 'top',
                                 labels: {
                                     color: '#94a3b8',
-                                    font: { family: 'Outfit', size: 11 }
+                                    font: { family: 'Outfit', size: 10, weight: '500' },
+                                    boxWidth: 8,
+                                    boxHeight: 8,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#121425',
+                                borderColor: '#1B1E32',
+                                borderWidth: 1,
+                                titleColor: '#ffffff',
+                                bodyColor: '#cbd5e1',
+                                titleFont: { family: 'Outfit', size: 11, weight: 'bold' },
+                                bodyFont: { family: 'Outfit', size: 10 },
+                                cornerRadius: 10,
+                                padding: 10,
+                                displayColors: true,
+                                boxWidth: 6,
+                                boxHeight: 6,
+                                boxPadding: 4,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += '$' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                        }
+                                        return label;
+                                    }
                                 }
                             }
                         },
                         scales: {
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.02)' },
                                 ticks: {
                                     color: '#64748b',
-                                    font: { family: 'Outfit', size: 10 },
-                                    maxTicksLimit: 12
+                                    font: { family: 'Outfit', size: 9 },
+                                    maxTicksLimit: 10
                                 }
                             },
                             y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.02)' },
                                 ticks: {
                                     color: '#64748b',
-                                    font: { family: 'Outfit', size: 10 },
+                                    font: { family: 'Outfit', size: 9 },
                                     callback: function(value) { return '$' + value.toLocaleString(); }
                                 }
                             }

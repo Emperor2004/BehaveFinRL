@@ -242,10 +242,14 @@ def run_multi_seed_training(quick_run=False):
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
     
-    # Split train_df: 80% for training, 20% for validation early stopping
-    split_idx = int(len(train_df) * 0.8)
-    train_sub_df = train_df.iloc[:split_idx].reset_index(drop=True)
-    val_df = train_df.iloc[split_idx:].reset_index(drop=True)
+    # Split train_df: use Lopez de Prado's Purged & Embargoed Cross-Validation (Fold 5)
+    # to prevent data leakage and serial correlation overlap bias.
+    from validation.cv import PurgedEmbargoKFold
+    cv = PurgedEmbargoKFold(n_splits=5, purging_window=20, pct_embargo=0.01)
+    splits = cv.split(train_df)
+    train_idx, val_idx = splits[-1]  # Use Fold 5 for training/validation splits
+    train_sub_df = train_df.iloc[train_idx].reset_index(drop=True)
+    val_df = train_df.iloc[val_idx].reset_index(drop=True)
     
     # Load HMM regime detector
     hmm_path = PROJECT_ROOT / "saved_models" / "hmm_regime_detector.joblib"

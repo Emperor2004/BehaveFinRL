@@ -19,7 +19,8 @@ from tests.test_hmm import (
 )
 from tests.test_env import (
     test_env_initialization,
-    test_env_continuous_weight_transitions
+    test_env_continuous_weight_transitions,
+    test_env_prospect_theory_reward
 )
 from tests.test_cv import (
     test_purged_embargo_cv
@@ -62,6 +63,7 @@ def main():
         # Gym trading env tests
         test_env_initialization,
         test_env_continuous_weight_transitions,
+        test_env_prospect_theory_reward,
         
         # Data partitioning tests
         test_purged_embargo_cv

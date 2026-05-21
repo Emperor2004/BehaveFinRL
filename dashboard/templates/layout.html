@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950">
+<html lang="en" class="h-full bg-[#0B0D19]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,18 +25,17 @@
     <style>
         body {
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at top right, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.9));
+            background-color: #0B0D19;
+            color: #E2E8F0;
         }
         .glass-card {
-            background: rgba(30, 41, 59, 0.45);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            background: #121425;
+            border: 1px solid #1B1E32;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
         .glow-hover:hover {
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.25);
+            border-color: rgba(138, 43, 226, 0.4);
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -44,72 +43,109 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
+            background: #0B0D19;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.3);
-            border-radius: 3px;
+            background: #25283C;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(148, 163, 184, 0.5);
+            background: #3B82F6;
         }
     </style>
 </head>
-<body class="h-full text-slate-100 flex flex-col md:flex-row overflow-hidden">
+<body class="h-full text-slate-100 flex flex-col md:flex-row overflow-hidden relative">
+
+    <!-- Ambient Background Glows -->
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-purple-600/5 blur-[130px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[130px] pointer-events-none z-0"></div>
 
     <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-slate-900/80 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col z-20">
+    <aside class="w-full md:w-64 bg-[#0F1122] border-b md:border-b-0 md:border-r border-[#1B1E32] flex flex-col z-20 relative">
         <!-- Logo -->
-        <div class="p-6 border-b border-slate-800 flex items-center space-x-3">
-            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+        <div class="p-6 border-b border-[#1B1E32] flex items-center space-x-3">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/20">
                 <i class="fa-solid fa-chart-line text-lg"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-white">BehaveFinRL</h1>
-                <span class="text-xs text-slate-500 font-medium">Prospect Theory RL Agent</span>
+                <h1 class="text-lg font-bold tracking-wider text-white">BEHAVE FINRL</h1>
+                <span class="text-[10px] text-slate-500 font-semibold tracking-wider block uppercase">Prospect Theory Agent</span>
             </div>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="/" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'overview' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
-                <i class="fa-solid fa-gauge-high group-hover:text-blue-400 {% if active_page == 'overview' %}text-white{% endif %}"></i>
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <a href="/" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'overview' %}bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-[0_0_15px_rgba(138,43,226,0.35)]{% else %}text-slate-400 hover:bg-white/[0.03] hover:text-white{% endif %}">
+                <i class="fa-solid fa-gauge-high group-hover:text-purple-400 {% if active_page == 'overview' %}text-white{% endif %}"></i>
                 <span>Overview</span>
             </a>
-            <a href="/training" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'training' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
-                <i class="fa-solid fa-network-wired group-hover:text-blue-400 {% if active_page == 'training' %}text-white{% endif %}"></i>
-                <span>Training Performance</span>
+            <a href="/training" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'training' %}bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-[0_0_15px_rgba(138,43,226,0.35)]{% else %}text-slate-400 hover:bg-white/[0.03] hover:text-white{% endif %}">
+                <i class="fa-solid fa-network-wired group-hover:text-purple-400 {% if active_page == 'training' %}text-white{% endif %}"></i>
+                <span>Training Mechanics</span>
             </a>
-            <a href="/regime" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'regime' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
-                <i class="fa-solid fa-cloud-sun group-hover:text-blue-400 {% if active_page == 'regime' %}text-white{% endif %}"></i>
+            <a href="/regime" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'regime' %}bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-[0_0_15px_rgba(138,43,226,0.35)]{% else %}text-slate-400 hover:bg-white/[0.03] hover:text-white{% endif %}">
+                <i class="fa-solid fa-cloud-sun group-hover:text-purple-400 {% if active_page == 'regime' %}text-white{% endif %}"></i>
                 <span>Market Regimes</span>
             </a>
-            <a href="/shap" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'shap' %}bg-blue-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
-                <i class="fa-solid fa-brain group-hover:text-blue-400 {% if active_page == 'shap' %}text-white{% endif %}"></i>
-                <span>SHAP Explainability</span>
+            <a href="/shap" class="flex items-center space-x-3 px-4 py-3 rounded-xl transition duration-200 group {% if active_page == 'shap' %}bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-[0_0_15px_rgba(138,43,226,0.35)]{% else %}text-slate-400 hover:bg-white/[0.03] hover:text-white{% endif %}">
+                <i class="fa-solid fa-brain group-hover:text-purple-400 {% if active_page == 'shap' %}text-white{% endif %}"></i>
+                <span>Explainability (SHAP)</span>
             </a>
         </nav>
 
-        <!-- Footer -->
-        <div class="p-6 border-t border-slate-800 bg-slate-950/40 text-center">
-            <span class="text-xs text-slate-500 block">Developed by</span>
-            <span class="text-xs font-semibold text-slate-300">Om Narayan Pandit</span>
-            <span class="text-[10px] text-slate-600 block mt-1">SIBM Pune</span>
+        <!-- Sidebar Actions & Profile -->
+        <div class="border-t border-[#1B1E32] p-4 bg-[#0B0D19]/40 space-y-4">
+            <div class="flex items-center justify-between px-2 text-slate-500 text-xs">
+                <span class="hover:text-white cursor-pointer"><i class="fa-solid fa-gear mr-1"></i> Settings</span>
+                <span class="hover:text-white cursor-pointer"><i class="fa-solid fa-circle-question mr-1"></i> Help</span>
+            </div>
+            
+            <div class="flex items-center space-x-3 p-2 bg-[#121425]/80 border border-[#1B1E32] rounded-xl">
+                <div class="h-9 w-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+                    ON
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-xs font-semibold text-slate-200 block truncate">Om Narayan Pandit</span>
+                    <span class="text-[9px] text-slate-500 block truncate">SIBM Pune</span>
+                </div>
+            </div>
         </div>
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-950/10">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#0B0D19]/30 z-10">
         <!-- Header -->
-        <header class="h-16 border-b border-slate-800/80 flex items-center justify-between px-8 bg-slate-900/20 backdrop-blur-md z-10">
-            <div class="flex items-center space-x-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-800/60 px-2.5 py-1 rounded-md border border-slate-700/50">Status: Running</span>
-                <span class="text-xs text-slate-400 font-medium">Asset: SP500 Index</span>
+        <header class="h-16 border-b border-[#1B1E32] flex items-center justify-between px-8 bg-[#0F1122]/60 backdrop-blur-md sticky top-0 z-20">
+            <!-- Search & Indicators -->
+            <div class="flex items-center space-x-6">
+                <!-- Search bar placeholder from reference -->
+                <div class="relative hidden lg:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" placeholder="Search signals, metrics, weights..." class="bg-[#121425] border border-[#1B1E32] text-xs text-slate-300 pl-9 pr-4 py-2 rounded-xl focus:outline-none focus:border-purple-500/40 w-60 transition">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs text-slate-400 font-semibold tracking-wider uppercase">PPO Pipeline Active</span>
+                </div>
             </div>
+
+            <!-- Controls & Profile details -->
             <div class="flex items-center space-x-4">
-                <div class="text-right">
-                    <span class="text-xs text-slate-500 block">Date Range</span>
-                    <span class="text-xs font-medium text-slate-300">2018-01-01 to 2024-01-01</span>
+                <!-- Notification & Actions from reference -->
+                <div class="flex items-center space-x-2 border-r border-[#1B1E32] pr-4">
+                    <button class="h-8 w-8 text-slate-400 hover:text-white rounded-lg bg-[#121425] hover:bg-white/5 border border-[#1B1E32] flex items-center justify-center text-xs transition relative">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                    </button>
+                    <button class="h-8 w-8 text-slate-400 hover:text-white rounded-lg bg-[#121425] hover:bg-white/5 border border-[#1B1E32] flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3 text-right">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Asset Context</span>
+                        <span class="text-xs font-medium text-slate-300">S&P 500 (FRED: SP500)</span>
+                    </div>
                 </div>
             </div>
         </header>
