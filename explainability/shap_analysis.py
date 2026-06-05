@@ -43,8 +43,8 @@ def run_shap_analysis():
     test_path = PROJECT_ROOT / "data_cache" / f"{config.TICKER}_test.csv"
     hmm_path = PROJECT_ROOT / "saved_models" / "hmm_regime_detector.joblib"
     
-    # Load first seed agent (Seed 42) as the primary model to analyze
-    agent_path = PROJECT_ROOT / "saved_models" / "ppo_agent_seed_42.zip"
+    # Load the best model (symlink points to the most recent best model)
+    agent_path = PROJECT_ROOT / "saved_models" / "latest_best_model.zip"
     
     if not train_path.exists() or not test_path.exists() or not hmm_path.exists() or not agent_path.exists():
         # Fall back to any available zip file in saved_models

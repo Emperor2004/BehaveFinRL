@@ -159,7 +159,7 @@ def main():
     regime_detector = MarketRegimeDetector.load(hmm_path)
     
     # Load primary agent (seed 21 or first available seed)
-    agent_path = PROJECT_ROOT / "saved_models" / f"ppo_agent_seed_21.zip"
+    agent_path = PROJECT_ROOT / "saved_models" / f"latest_best_model.zip"
     if not agent_path.exists():
         # Fall back to first zip file in saved_models
         zip_files = list((PROJECT_ROOT / "saved_models").glob("*.zip"))

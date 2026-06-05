@@ -1,9 +1,22 @@
 # BehaveFinRL
 
-> A Prospect Theory-Driven Reinforcement Learning Trading Agent  
-> with Explainable, Regime-Adaptive Decision Making under Continuous CMDP Constraints
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.9%2B-brightgreen.svg)](https://www.python.org/)
+
+> **A Prospect Theory‑Driven Reinforcement Learning Trading Agent**
+> **with Explainable, Regime‑Adaptive Decision Making under Continuous CMDP Constraints**
 
 ---
+## Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Project Structure](#project-structure)
+- [Theoretical & Mathematical Background](#theoretical--mathematical-background)
+- [Installation & Setup](#installation--setup)
+- [Usage](#usage)
+- [Testing](#testing)
+- [References](#references)
+- [Author](#author)
 
 ## Overview
 
@@ -134,6 +147,32 @@ venv\Scripts\activate       # Linux/macOS: source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Tech Stack
+
+- **Programming Language**: Python 3.9+
+- **Reinforcement Learning**: Stable‑Baselines3 (PPO)
+- **Hyperparameter Optimization**: Optuna
+- **Data Retrieval**: Alpha Vantage, FRED APIs
+- **Time‑Series Modeling**: Hidden Markov Models (hmmlearn)
+- **Explainability**: SHAP (KernelExplainer)
+- **Stress Testing**: Custom GBM & GARCH simulators
+- **Web Interface**: Flask, Bootstrap 5, Chart.js (dark theme)
+- **Testing**: pytest
+
+## Pipeline Overview
+
+The end‑to‑end pipeline (`pipeline.py`) orchestrates the following steps:
+
+1. **Data Ingestion** – Pulls OHLCV data from Alpha Vantage and macro indicators from FRED, storing them under `data/`.
+2. **Feature Engineering** – Normalises data and creates technical indicators and micro‑structure proxies.
+3. **Regime Detection** – Trains an HMM on engineered features to label market regimes (Bull, Bear, High‑Vol).
+4. **Model Training** – Executes Optuna‑guided PPO training with L2 regularisation, early‑stopping on validation Sharpe, and regime‑adaptive loss‑aversion scaling.
+5. **Model Persistence** – Saves the best checkpoint and updates the `saved_models/latest_best_model.zip` symlink (or falls back to copy on Windows).
+6. **Explainability** – Runs SHAP analysis per regime, generating PNG plots under `dashboard/static/images/`.
+7. **Stress Testing** – Evaluates the trained policy on synthetic GBM/GARCH paths and historical bear periods, reporting cumulative returns, max drawdown, and VaR violations.
+8. **Dashboard Launch** – Starts the Flask app to visualise training curves, regime timelines, SHAP plots and stress‑test results.
+
+
 ### Environment Configuration
 Copy the sample environment variables file and fill in your API credentials:
 ```bash
@@ -144,37 +183,84 @@ Open `.env` and configure your keys:
 - `FRED_API_KEY`
 
 ---
+## What's New
+
+- Fixed symlink creation for the best model on Windows by falling back to copying when insufficient privileges.
+- Added L2 regularisation (`weight_decay`) integration into PPO optimizer.
+- Resolved duplicate `batch_size` definition and corrected PPO initialization arguments.
+- Cleaned up indentation errors in model saving block.
+- Updated README Table of Contents with a dedicated "What's New" entry.
+
+---
 
 ## Usage
 
-### 1. Unified Training Pipeline
+### 1️⃣ Unified Training Pipeline
 Run the unified training script to fetch data, preprocess features, fit the HMM regime detector, train the regularized PPO agent (across 5 seeds), and evaluate results:
 ```bash
 python train.py
 ```
-*To run a quick dry-run with reduced timesteps (2048 steps per seed) to verify compilation:*
+*To run a quick dry‑run with reduced timesteps (2048 steps per seed) to verify compilation:*
 ```bash
 python train.py --quick
 ```
 
-### 2. Generate SHAP Explanations
+### 2️⃣ Generate SHAP Explanations
 Calculate feature attribution charts across HMM regimes for the trained continuous policy:
 ```bash
 python explainability/shap_analysis.py
 ```
 
-### 3. Run Stress Testing
+### 3️⃣ Run Stress Testing
 Execute synthetic GBM/GARCH simulations and historical stress evaluations:
 ```bash
 python validation/stress_test.py
 ```
 
-### 4. Launch Flask Dashboard
+### 4️⃣ Launch Flask Dashboard
 Start the interactive visualization server:
 ```bash
 python dashboard/app.py
 ```
 Open your browser and navigate to: **http://127.0.0.1:5000**
+
+### Optional arguments for the command‑line scripts
+
+- **train.py**
+  - `--quick` – runs a dry‑run with only 2048 timesteps per seed (useful for quick sanity checks).
+  - `--load-best` – loads hyper‑parameters from `best_hyperparams.json` and re‑trains a single deterministic trial, then saves the model.
+  - `--trials N` – number of Optuna trials to perform (default = 1 when omitted).
+
+- **pipeline.py**
+  - `--trials N` – number of Optuna trials (default = 20).
+  - `--no-shap` – skip the SHAP explainability step.
+  - `--no-stress` – skip the stress‑testing step.
+  - `--launch-dash` – launch the Flask dashboard after the pipeline finishes.
+
+- **shap_analysis.py** – currently has no additional flags; it simply runs SHAP analysis on the model pointed to by the `latest_best_model.zip` symlink.
+
+- **validation/stress_test.py** – runs the full suite of synthetic and historical stress tests; you can edit the script to adjust the number of simulations.
+
+These options can be combined, e.g.:
+```
+python pipeline.py --trials 30 --no-shap --launch-dash
+```
+### Model persistence & versioning
+- After each Optuna study, the best model is saved with a deterministic filename `<timestamp>-Study-<uuid>_best_model_trial_<n>.zip` inside `saved_models/`.
+- A stable symlink `saved_models/latest_best_model.zip` always points to the most recent best model. Downstream scripts (e.g., `shap_analysis.py`) load this symlink, avoiding confusion when multiple checkpoints exist.
+- To load the model in Python:
+
+```python
+from utils.save_utils import load_model
+model = load_model(Path("saved_models/latest_best_model.zip"))
+```
+
+- You can list available checkpoints with:
+
+```bash
+ls saved_models/*.zip
+```
+
 
 ---
 

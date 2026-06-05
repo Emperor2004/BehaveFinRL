@@ -48,17 +48,17 @@ def test_env_continuous_weight_transitions():
     # 1. Allocate 100% Long: action = [1.0]
     obs, reward, terminated, truncated, info = env.step(np.array([1.0], dtype=np.float32))
     
-    # Friction verification:
+    # Friction verification (using actual config values):
     # weight change delta = 1.0 (from 0.0 to 1.0)
     # fee = 1.0 * TRANSACTION_FEE_PCT (0.0015)
     # slippage = 1.0 * (0.5 * bid_ask_spread + SLIPPAGE_COEF * rolling_volatility)
     #          = 1.0 * (0.00025 + 0.05 * 0.015) = 0.001
-    # market impact = MARKET_IMPACT_COEF * delta^2 = 0.02 * (1.0)^2 = 0.02
-    # total drag = 0.0015 + 0.001 + 0.02 = 0.0225
+    # market impact = MARKET_IMPACT_COEF * delta^2 = 0.002 * (1.0)^2 = 0.002
+    # total drag = 0.0015 + 0.001 + 0.002 = 0.0045
     # asset return = 110/100 - 1.0 = 0.10
-    # portfolio net return = 1.0 * 0.10 - 0.0225 = 0.0775
-    # net worth = 10000 * 1.0775 = 10775.0
-    assert abs(env.net_worth - 10775.0) < 1.0
+    # portfolio net return = 1.0 * 0.10 - 0.0045 = 0.0955
+    # net worth = 10000 * 1.0955 = 10955.0
+    assert abs(env.net_worth - 10955.0) < 1.0
     assert env.holding_state > 0.95
     
     # 2. Rebalance to Neutral: action = [0.0]
@@ -67,7 +67,7 @@ def test_env_continuous_weight_transitions():
     assert abs(env.shares) < 1e-4
 
 def test_env_prospect_theory_reward():
-    from models.reward import prospect_theory_utility
+    from models.reward import weighted_prospect_utility, probability_weight
     mock_df = pd.DataFrame({
         "date": ["2023-01-01", "2023-01-02", "2023-01-03"],
         "adj_close": [100.0, 105.0, 95.0],
@@ -84,27 +84,40 @@ def test_env_prospect_theory_reward():
     # delta = 0.5 - 0.0 = 0.5
     # fee = 0.5 * 0.0015 = 0.00075
     # slippage = 0.5 * (0.5 * 0.001 + 0.05 * 0.01) = 0.5 * (0.0005 + 0.0005) = 0.0005
-    # impact = 0.02 * (0.5 ** 2) = 0.005
-    # total drag = 0.00075 + 0.0005 + 0.005 = 0.00625
+    # impact = 0.002 * (0.5 ** 2) = 0.0005
+    # total drag = 0.00075 + 0.0005 + 0.0005 = 0.00175
     # asset return = 105.0 / 100.0 - 1.0 = 0.05
     # raw portfolio return = 0.5 * 0.05 = 0.025
-    # net portfolio return = 0.025 - 0.00625 = 0.01875
+    # net portfolio return = 0.025 - 0.00175 = 0.02325
+    # net worth = 10000 * 1.02325 = 10232.5
     #
-    # Now let's calculate penalties:
-    # drawdown = 0.0 (net worth increases)
-    # dd_penalty = 0.0
-    # var_95 = 0.0
-    # var_penalty = 0.0
-    # action_penalty = config.ACTION_REG_COEF * (delta ** 2) = 0.5 * (0.5 ** 2) = 0.125
+    # net_worth_history = [10000, 10232.5]
+    # rolling_mean_net_worth = mean([10000, 10232.5]) = 10116.25  (Bull regime)
+    # reference_point = 10116.25
+    # pnl_vs_reference = (10232.5 - 10116.25) / 10116.25 ≈ 0.011491
     #
-    # Prospect Theory reward base:
-    # net_portfolio_return >= 0: pt_utility = net_portfolio_return ** 0.88 = 0.01875 ** 0.88
-    # expected reward = pt_utility - action_penalty = 0.01875 ** 0.88 - 0.125
+    # win_rate = 0.5 (buffer < 5)
+    # pt_utility = weighted_prospect_utility(pnl_vs_reference, win_rate=0.5, lam=current_lambda, gamma=0.65)
+    #            = probability_weight(0.5, 0.65) * pnl_vs_reference ** 0.88
+    #
+    # action_penalty = ACTION_REG_COEF * (0.5 ** 2) = 0.005 * 0.25 = 0.00125
+    # var_penalty = 0 (no breach), dd_penalty = 0
+    # reward = pt_utility - action_penalty
     
     obs, reward, terminated, truncated, info = env.step(np.array([0.5], dtype=np.float32))
     
-    expected_pt = (0.01875) ** 0.88
-    expected_action_penalty = 0.5 * (0.5 ** 2)
+    # Compute expected values
+    net_portfolio_return = 0.5 * 0.05 - (0.5 * 0.0015 + 0.5 * (0.5 * 0.001 + 0.05 * 0.01) + 0.002 * 0.25)
+    net_worth = 10000.0 * (1.0 + net_portfolio_return)
+    rolling_mean = np.mean([10000.0, net_worth])
+    pnl_vs_ref = (net_worth - rolling_mean) / rolling_mean
+    expected_pt = weighted_prospect_utility(
+        pnl_vs_ref,
+        win_rate=0.5,
+        lam=config.PROSPECT_LAMBDA,
+        gamma=config.PROB_WEIGHT_GAMMA,
+    )
+    expected_action_penalty = config.ACTION_REG_COEF * (0.5 ** 2)
     expected_reward = expected_pt - expected_action_penalty
     
     assert abs(reward - expected_reward) < 1e-6

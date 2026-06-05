@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.kiro/
 # C extensions
 *.so
 
@@ -174,3 +174,26 @@ checkpoints/
 output/
 data_cache/
 saved_models/
+# Database files (runtime)
+*.db
+*.sqlite
+*.sqlite3
+
+# Project‑specific ignores
+# -----------------------
+# Raw data fetched from APIs (large CSV / JSON files)
+data/
+# Dashboard generated images (SHAP plots, etc.)
+/dashboard/static/images/*.png
+# Model training checkpoints (already covered but explicit)
+checkpoints/
+# Any temporary files created by experiments
+# Trial output files (Optuna / model checkpoints)
+# ------------------------------------------------
+# These are generated per trial and can be large; they are already covered by
+# *.zip, *.pkl, *.joblib, and the saved_models/ folder, but we keep this explicit
+# block for clarity.
+*_trial_*.zip
+*_best_model_trial_*.zip
+# TensorBoard event files
+events.out.tfevents.*

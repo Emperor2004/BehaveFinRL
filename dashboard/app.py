@@ -130,10 +130,21 @@ def api_portfolio_data():
     first_seed = list(eval_logs.keys())[0]
     dates = eval_logs[first_seed]["dates"]
     prices = eval_logs[first_seed]["prices"]
-    
+
+    # Filter out rows where date is None/NaN
+    valid_mask = [d is not None and d == d for d in dates]  # NaN != NaN
+    dates  = [d for d, v in zip(dates, valid_mask) if v]
+    prices = [p for p, v in zip(prices, valid_mask) if v]
+
+    # Guard against empty or zero-price data
+    if len(prices) == 0 or prices[0] == 0:
+        return jsonify({"error": "Invalid benchmark data"})
+
     # Calculate buy-and-hold benchmark curve (starting at config.INITIAL_BALANCE)
     initial_price = prices[0]
     benchmark_curve = [(p / initial_price) * config.INITIAL_BALANCE for p in prices]
+    # Prepend initial balance to align benchmark length with net_worth_history
+    benchmark_curve = [config.INITIAL_BALANCE] + benchmark_curve
     
     response = {
         "dates": dates,

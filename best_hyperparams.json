@@ -1,0 +1,12 @@
+{
+    "learning_rate": 6.129672404489216e-05,
+    "gamma": 0.9205495593610955,
+    "gae_lambda": 0.9012426543845682,
+    "clip_range": 0.20115305740595735,
+    "ent_coef": 7.576755281745739e-05,
+    "vf_coef": 0.7678227923692865,
+    "batch_size": 256,
+    "n_steps": 1024,
+    "activation_fn": "tanh",
+    "net_arch_idx": 2
+}

@@ -1,6 +1,70 @@
 import os
+import random
+import logging
+
+# Default logging level
+LOG_LEVEL = logging.INFO
+
+def get_cfg(**overrides) -> dict:
+    """Return configuration dictionary.
+
+    Starts from module-level defaults and applies any overrides passed
+    via keyword arguments.
+    """
+    cfg = {
+        "TICKER": TICKER,
+        "START_DATE": START_DATE,
+        "END_DATE": END_DATE,
+        "PROSPECT_ALPHA": PROSPECT_ALPHA,
+        "PROSPECT_BETA": PROSPECT_BETA,
+        "PROSPECT_LAMBDA": PROSPECT_LAMBDA,
+        "PROB_WEIGHT_GAMMA": PROB_WEIGHT_GAMMA,
+        "LAMBDA_BULL": LAMBDA_BULL,
+        "LAMBDA_BEAR": LAMBDA_BEAR,
+        "LAMBDA_VOLATILE": LAMBDA_VOLATILE,
+        "HMM_STATES": HMM_STATES,
+        "HMM_COVARIANCE_TYPE": HMM_COVARIANCE_TYPE,
+        "HMM_RANDOM_STATE": HMM_RANDOM_STATE,
+        "PPO_TIMESTEPS": PPO_TIMESTEPS,
+        "LEARNING_RATE": LEARNING_RATE,
+        "BATCH_SIZE": BATCH_SIZE,
+        "N_STEPS": N_STEPS,
+        "GAMMA": GAMMA,
+        "ENTROPY_COEF": ENTROPY_COEF,
+        "GAE_LAMBDA": GAE_LAMBDA,
+        "CLIP_RANGE": CLIP_RANGE,
+        "SEEDS": SEEDS,
+        "INITIAL_BALANCE": INITIAL_BALANCE,
+        "TRANSACTION_FEE_PCT": TRANSACTION_FEE_PCT,
+        "SLIPPAGE_COEF": SLIPPAGE_COEF,
+        "MARKET_IMPACT_COEF": MARKET_IMPACT_COEF,
+        "SORTINO_WINDOW": SORTINO_WINDOW,
+        "MAX_DRAWDOWN_LIMIT": MAX_DRAWDOWN_LIMIT,
+        "VAR_ALPHA": VAR_ALPHA,
+        "VAR_LIMIT": VAR_LIMIT,
+        "VAR_PENALTY_COEF": VAR_PENALTY_COEF,
+        "DD_PENALTY_COEF": DD_PENALTY_COEF,
+        "ACTION_REG_COEF": ACTION_REG_COEF,
+        "POSITION_CAP_BULL": POSITION_CAP_BULL,
+        "POSITION_CAP_VOLATILE": POSITION_CAP_VOLATILE,
+        "POSITION_CAP_BEAR": POSITION_CAP_BEAR,
+        "device": "cuda" if torch.cuda.is_available() else "cpu",
+        "seed": random.randint(0, 2**32 - 1),
+        "log_level": LOG_LEVEL,
+        # tuning defaults
+        "n_trials": 50,
+        "timeout_minutes": None,
+        "pruner": "median",
+        "parallel_jobs": 1,
+        "eval_episodes": 10,
+    }
+    cfg.update(overrides)
+    return cfg
+
 from pathlib import Path
 from dotenv import load_dotenv
+import logging
+import torch
 
 # Load environment variables from .env
 load_dotenv()
@@ -11,10 +75,21 @@ DATA_DIR = BASE_DIR / "data_cache"
 MODEL_DIR = BASE_DIR / "saved_models"
 LOG_DIR = BASE_DIR / "logs"
 
-# Create directories if they do not exist
+# Ensure directories exist
 DATA_DIR.mkdir(exist_ok=True)
 MODEL_DIR.mkdir(exist_ok=True)
 LOG_DIR.mkdir(exist_ok=True)
+
+# Additional path constants used throughout the project
+ROOT_DIR = BASE_DIR
+STUDIES_DIR = ROOT_DIR / "studies"
+STUDIES_DIR.mkdir(exist_ok=True)
+BEST_CONFIG_DIR = ROOT_DIR / "best_configs"
+BEST_CONFIG_DIR.mkdir(exist_ok=True)
+BEST_CONFIG_DIR.mkdir(exist_ok=True)
+LOGS_DIR = LOG_DIR
+MODELS_DIR = MODEL_DIR
+BEST_CONFIG_DIR = ROOT_DIR / "best_configs"
 
 # API Keys
 ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY")
@@ -39,6 +114,9 @@ FRED_SERIES = {
 PROSPECT_ALPHA = 0.88   # Diminishing sensitivity exponent for gains
 PROSPECT_BETA = 0.88    # Diminishing sensitivity exponent for losses
 PROSPECT_LAMBDA = 2.25  # Baseline loss aversion coefficient
+
+# Probability Weighting (Tversky-Kahneman / Prelec)
+PROB_WEIGHT_GAMMA = 0.65  # Curvature parameter γ for probability weighting functions
 
 # Regime-Adaptive Loss Aversion Parameters
 # HMM Regime mapping: Bull (state 0), Bear (state 1), High Volatility (state 2)
@@ -68,14 +146,18 @@ SEEDS = [42, 7, 21, 99, 5]
 INITIAL_BALANCE = 10000.0
 TRANSACTION_FEE_PCT = 0.0015  # 0.15% base fee per transaction
 SLIPPAGE_COEF = 0.05          # Slippage factor scaled by rolling volatility
-MARKET_IMPACT_COEF = 0.02     # Quadratic market impact penalty
+MARKET_IMPACT_COEF = 0.002    # Quadratic market impact penalty (was 0.02 — caused reward collapse)
 
 # Risk Constraints & Reward shaping
 SORTINO_WINDOW = 63           # 3-month rolling window for Sortino calculation
 MAX_DRAWDOWN_LIMIT = 0.15     # 15% Max Drawdown Constraint
 VAR_ALPHA = 0.95              # 95% Value-at-Risk confidence
 VAR_LIMIT = 0.03              # 3% maximum Value-at-Risk constraint
-VAR_PENALTY_COEF = 50.0       # Penalty multiplier for VaR breach
-DD_PENALTY_COEF = 50.0        # Penalty multiplier for Drawdown breach
-ACTION_REG_COEF = 0.5         # Penalty multiplier for target weight changes (regularization)
+VAR_PENALTY_COEF = 10.0       # Penalty multiplier for VaR breach (was 50.0 — dominated reward)
+DD_PENALTY_COEF = 10.0        # Penalty multiplier for Drawdown breach (was 50.0 — dominated reward)
+ACTION_REG_COEF = 0.005       # Penalty for target weight changes (was 0.5 — the PRIMARY cause of collapse)
 
+# Regime-Scaled Position Sizing Caps
+POSITION_CAP_BULL     = 1.0   # Bull regime: full ±1.0 range allowed
+POSITION_CAP_VOLATILE = 0.75  # Volatile regime: shrink to ±0.75
+POSITION_CAP_BEAR     = 0.6   # Bear regime: shrink to ±0.6
