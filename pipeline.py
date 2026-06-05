@@ -71,7 +71,7 @@ def main(trials: int = 20, shap: bool = True, stress: bool = True, launch_dash: 
         print("\nLaunching Flask dashboard …")
         run_cmd("python dashboard/app.py")
 
-    print("\n✅  Full pipeline completed.")
+    print("\n[OK]  Full pipeline completed.")
     # Show the saved best model location for quick reference
     best_models = list(Path("saved_models").glob("best_model_trial_*.zip"))
     if best_models:
